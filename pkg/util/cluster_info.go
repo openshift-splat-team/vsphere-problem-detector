@@ -107,7 +107,13 @@ func (c *ClusterInfo) GetHostVersions() map[string]ESXiVersionInfo {
 }
 
 func (c *ClusterInfo) GetVCenterHostnames() []string {
-	return c.vcenterHostnames
+	c.esxiVersionsLock.RLock()
+	defer c.esxiVersionsLock.RUnlock()
+
+	// Make a copy to avoid race
+	hostnames := make([]string, len(c.vcenterHostnames))
+	copy(hostnames, c.vcenterHostnames)
+	return hostnames
 }
 
 func (c *ClusterInfo) GetVCenterVersion(hostname string) (string, string) {
